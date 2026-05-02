@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مهند صابر — معماري الأتمتة والذكاء الاصطناعي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=Space+Mono:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --orange:       #C85500;
+      --orange-light: #E86010;
+      --orange-glow:  #FF6B1A;
+      --dark:         #070707;
+      --dark-2:       #0E0E0E;
+      --dark-3:       #151515;
+      --dark-4:       #1C1C1C;
+      --border:       rgba(200,85,0,0.16);
+      --text:         #F2EDE7;
+      --text-muted:   #7A756E;
+      --text-dim:     #42403C;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Tajawal', sans-serif; background: var(--dark); color: var(--text); overflow-x: hidden; cursor: none; }
+
+    /* Cursor */
+    .cursor { width: 9px; height: 9px; background: var(--orange-glow); border-radius: 50%; position: fixed; top:0; left:0; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); mix-blend-mode:screen; }
+    .cursor-ring { width: 34px; height: 34px; border: 1.5px solid var(--orange); border-radius: 50%; position: fixed; top:0; left:0; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:transform 0.18s ease, width 0.2s, height 0.2s, opacity 0.2s; opacity:0.55; }
+    .cursor-ring.hover { width:54px; height:54px; opacity:1; border-color:var(--orange-glow); }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--dark); }
+    ::-webkit-scrollbar-thumb { background: var(--orange); border-radius:2px; }
+
+    body::before { content:''; position:fixed; inset:0; z-index:0; opacity:0.03; pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:200px; }
+
+    /* Nav */
+    nav { position:fixed; top:0; width:100%; z-index:100; padding:22px 64px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid transparent; transition:all 0.4s ease; }
+    nav.scrolled { background:rgba(7,7,7,0.93); border-color:var(--border); backdrop-filter:blur(20px); padding:15px 64px; }
+    .nav-logo { font-family:'Space Mono',monospace; font-size:12px; letter-spacing:0.1em; color:var(--orange-light); text-transform:uppercase; display:flex; align-items:center; gap:8px; }
+    .nav-logo-dot { width:7px; height:7px; background:var(--orange-glow); border-radius:50%; animation:blink 1.5s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    .nav-links { display:flex; gap:36px; list-style:none; }
+    .nav-links a { text-decoration:none; color:var(--text-muted); font-size:14px; font-weight:500; letter-spacing:0.04em; transition:color 0.25s; position:relative; }
+    .nav-links a::after { content:''; position:absolute; bottom:-4px; right:0; width:0; height:1px; background:var(--orange-glow); transition:width 0.3s ease; }
+    .nav-links a:hover { color:var(--text); }
+    .nav-links a:hover::after { width:100%; }
+    .nav-cta { background:var(--orange) !important; color:#fff !important; padding:9px 22px; border-radius:4px; font-weight:700 !important; transition:background 0.25s, transform 0.2s !important; }
+    .nav-cta:hover { background:var(--orange-glow) !important; transform:translateY(-1px); }
+    .nav-cta::after { display:none !important; }
+
+    /* Hero */
+    #hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; padding:140px 64px 80px; position:relative; overflow:hidden; }
+    .hero-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(200,85,0,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(200,85,0,0.055) 1px,transparent 1px); background-size:64px 64px; mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,black 25%,transparent 100%); }
+    .hero-glow { position:absolute; width:800px; height:800px; background:radial-gradient(circle,rgba(200,85,0,0.13) 0%,transparent 65%); top:-250px; left:-250px; pointer-events:none; animation:pulseGlow 7s ease-in-out infinite alternate; }
+    @keyframes pulseGlow { from{opacity:0.5;transform:scale(1)} to{opacity:0.9;transform:scale(1.12)} }
+
+    .hero-tag { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.22em; color:var(--orange-light); text-transform:uppercase; border:1px solid var(--border); padding:7px 16px; border-radius:2px; margin-bottom:34px; display:inline-flex; align-items:center; gap:9px; opacity:0; animation:fadeUp 0.7s 0.2s forwards; }
+    .hero-tag::before { content:''; width:6px; height:6px; background:var(--orange-glow); border-radius:50%; animation:blink 1.5s infinite; }
+
+    .hero-h1 { font-size:clamp(50px,8vw,110px); font-weight:900; line-height:0.95; letter-spacing:-0.025em; color:var(--text); margin-bottom:10px; opacity:0; animation:fadeUp 0.8s 0.38s forwards; }
+    .hero-h1-accent { color:var(--orange-glow); }
+    .hero-sub { font-family:'Bebas Neue',sans-serif; font-size:clamp(26px,4vw,52px); letter-spacing:0.1em; color:var(--text-muted); margin-bottom:30px; opacity:0; animation:fadeUp 0.8s 0.52s forwards; }
+    .hero-desc { font-size:17px; font-weight:300; line-height:1.85; color:var(--text-muted); max-width:520px; margin-bottom:50px; opacity:0; animation:fadeUp 0.8s 0.66s forwards; }
+    .hero-desc strong { color:var(--orange-light); font-weight:600; }
+    .hero-btns { display:flex; gap:14px; align-items:center; opacity:0; animation:fadeUp 0.8s 0.8s forwards; flex-wrap:wrap; }
+
+    .btn-primary { background:var(--orange); color:#fff; padding:15px 34px; border-radius:4px; font-size:15px; font-weight:700; text-decoration:none; letter-spacing:0.04em; transition:background 0.25s,transform 0.2s,box-shadow 0.25s; display:inline-flex; align-items:center; gap:10px; }
+    .btn-primary:hover { background:var(--orange-glow); transform:translateY(-2px); box-shadow:0 14px 44px rgba(200,85,0,0.42); }
+    .btn-wa { background:#25D366; color:#fff; padding:15px 28px; border-radius:4px; font-size:15px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:background 0.25s,transform 0.2s; }
+    .btn-wa:hover { background:#1EB858; transform:translateY(-2px); }
+    .btn-secondary { color:var(--text-muted); padding:15px 26px; border-radius:4px; font-size:15px; font-weight:500; text-decoration:none; border:1px solid var(--border); transition:color 0.25s,border-color 0.25s,transform 0.2s; display:inline-flex; align-items:center; gap:8px; }
+    .btn-secondary:hover { color:var(--text); border-color:var(--orange); transform:translateY(-2px); }
+
+    .hero-stats { position:absolute; bottom:58px; left:64px; display:flex; gap:44px; opacity:0; animation:fadeUp 0.8s 0.95s forwards; }
+    .stat-item { display:flex; flex-direction:column; gap:4px; }
+    .stat-num { font-family:'Space Mono',monospace; font-size:28px; font-weight:700; color:var(--orange-glow); }
+    .stat-label { font-size:11px; color:var(--text-dim); letter-spacing:0.12em; text-transform:uppercase; }
+
+    .scroll-hint { position:absolute; bottom:58px; right:64px; display:flex; flex-direction:column; align-items:center; gap:8px; opacity:0; animation:fadeUp 0.8s 1.05s forwards; }
+    .scroll-hint span { font-size:9px; letter-spacing:0.22em; color:var(--text-dim); text-transform:uppercase; writing-mode:vertical-rl; }
+    .scroll-line { width:1px; height:56px; background:linear-gradient(to bottom,var(--orange),transparent); animation:scrollDown 2.2s infinite; }
+    @keyframes scrollDown { 0%{transform:scaleY(0);transform-origin:top} 50%{transform:scaleY(1);transform-origin:top} 51%{transform-origin:bottom} 100%{transform:scaleY(0);transform-origin:bottom} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+
+    /* Sections */
+    section { padding:120px 64px; position:relative; }
+    .section-tag { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.28em; color:var(--orange); text-transform:uppercase; margin-bottom:18px; }
+    .section-h2 { font-size:clamp(34px,5vw,64px); font-weight:900; letter-spacing:-0.02em; line-height:1.05; margin-bottom:22px; }
+    .section-h2 em { font-style:normal; color:var(--orange-glow); }
+
+    /* About */
+    #about { background:var(--dark-2); }
+    .about-grid { display:grid; grid-template-columns:1fr 1.3fr; gap:80px; align-items:center; max-width:1200px; margin:0 auto; }
+    .about-img-wrap { position:relative; }
+    .about-img-outer { position:relative; width:340px; height:340px; margin:0 auto; }
+    .about-img-ring { position:absolute; inset:-12px; border:1px solid var(--border); border-radius:50%; }
+    .about-img-ring-2 { position:absolute; inset:-28px; border:1px dashed rgba(200,85,0,0.12); border-radius:50%; animation:spinSlow 20s linear infinite; }
+    @keyframes spinSlow { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    .about-photo { width:340px; height:340px; border-radius:50%; object-fit:cover; object-position:center top; display:block; border:3px solid var(--orange); filter:brightness(0.95) contrast(1.05); }
+    .about-badge { position:absolute; bottom:-10px; right:-10px; background:var(--orange); padding:14px 18px; border-radius:6px; font-family:'Space Mono',monospace; font-size:10px; line-height:1.7; color:#fff; text-align:center; }
+    .about-badge strong { display:block; font-size:20px; font-family:'Tajawal',sans-serif; font-weight:800; }
+    .about-name { font-size:clamp(30px,4vw,48px); font-weight:900; margin-bottom:6px; }
+    .about-name em { font-style:normal; color:var(--orange-glow); }
+    .about-role { font-family:'Space Mono',monospace; font-size:12px; letter-spacing:0.12em; color:var(--orange); text-transform:uppercase; margin-bottom:24px; }
+    .about-text p { font-size:15.5px; line-height:1.9; color:var(--text-muted); margin-bottom:18px; }
+    .about-text strong { color:var(--text); font-weight:600; }
+    .skills-grid { display:flex; flex-wrap:wrap; gap:9px; margin-top:28px; }
+    .skill-chip { background:var(--dark-3); border:1px solid var(--border); padding:7px 14px; border-radius:3px; font-size:12px; font-weight:500; color:var(--text-muted); transition:all 0.25s; }
+    .skill-chip:hover { border-color:var(--orange); color:var(--orange-light); background:rgba(200,85,0,0.07); }
+
+    /* Services */
+    #services { background:var(--dark); }
+    .services-header { max-width:1200px; margin:0 auto 68px; }
+    .services-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; max-width:1200px; margin:0 auto; background:var(--border); border:1px solid var(--border); }
+    .service-card { background:var(--dark); padding:42px 34px; position:relative; overflow:hidden; transition:background 0.3s; cursor:default; }
+    .service-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--orange),var(--orange-glow)); transform:scaleX(0); transform-origin:right; transition:transform 0.4s ease; }
+    .service-card:hover::before { transform:scaleX(1); transform-origin:left; }
+    .service-card:hover { background:var(--dark-3); }
+    .service-num { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.12em; margin-bottom:26px; }
+    .service-icon { font-size:34px; margin-bottom:18px; display:block; transition:transform 0.3s; }
+    .service-card:hover .service-icon { transform:scale(1.1) translateY(-3px); }
+    .service-title { font-size:21px; font-weight:800; margin-bottom:12px; }
+    .service-desc { font-size:14px; line-height:1.8; color:var(--text-muted); }
+    .service-tags { display:flex; flex-wrap:wrap; gap:7px; margin-top:22px; }
+    .service-tag { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.05em; color:var(--orange); background:rgba(200,85,0,0.08); padding:4px 10px; border-radius:2px; }
+
+    /* Projects */
+    #projects { background:var(--dark-2); }
+    .projects-header { max-width:1200px; margin:0 auto 68px; }
+    .projects-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:20px; max-width:1200px; margin:0 auto; }
+    .project-card { background:var(--dark-3); border:1px solid var(--border); border-radius:8px; overflow:hidden; transition:transform 0.3s,border-color 0.3s; cursor:default; }
+    .project-card:hover { transform:translateY(-5px); border-color:var(--orange); }
+    .project-visual { height:180px; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; background:var(--dark-4); }
+    .project-visual-grid { position:absolute; inset:0; background-image:linear-gradient(rgba(200,85,0,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(200,85,0,0.06) 1px,transparent 1px); background-size:28px 28px; }
+    .project-emoji { font-size:56px; position:relative; z-index:1; }
+    .project-status { position:absolute; top:14px; right:14px; font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.1em; padding:5px 12px; border-radius:2px; }
+    .status-live { background:rgba(0,200,80,0.12); color:#00C850; border:1px solid rgba(0,200,80,0.2); }
+    .status-case { background:rgba(200,85,0,0.12); color:var(--orange-light); border:1px solid var(--border); }
+    .project-body { padding:28px 30px; }
+    .project-cat { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:0.2em; color:var(--orange); text-transform:uppercase; margin-bottom:10px; }
+    .project-title { font-size:20px; font-weight:800; margin-bottom:10px; }
+    .project-desc { font-size:13.5px; line-height:1.8; color:var(--text-muted); margin-bottom:20px; }
+    .project-footer { display:flex; align-items:center; justify-content:space-between; }
+    .project-tech { display:flex; gap:8px; flex-wrap:wrap; }
+    .proj-tag { font-size:11px; color:var(--text-dim); background:var(--dark-4); border:1px solid rgba(255,255,255,0.05); padding:3px 10px; border-radius:2px; }
+    .project-metric { font-family:'Space Mono',monospace; font-size:13px; color:var(--orange-glow); font-weight:700; }
+
+    /* Process */
+    #process { background:var(--dark); }
+    .process-inner { max-width:860px; margin:0 auto; }
+    .process-steps { margin-top:60px; position:relative; }
+    .process-steps::before { content:''; position:absolute; right:23px; top:0; bottom:0; width:1px; background:linear-gradient(to bottom,var(--orange),transparent); }
+    .process-step { display:grid; grid-template-columns:1fr 48px; gap:22px; margin-bottom:44px; }
+    .step-content { background:var(--dark-3); border:1px solid var(--border); border-radius:8px; padding:30px; transition:border-color 0.3s; }
+    .step-content:hover { border-color:var(--orange); }
+    .step-num-col { display:flex; flex-direction:column; align-items:center; padding-top:14px; }
+    .step-circle { width:48px; height:48px; background:var(--dark); border:2px solid var(--orange); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Space Mono',monospace; font-size:11px; color:var(--orange); font-weight:700; flex-shrink:0; position:relative; z-index:1; }
+    .step-title { font-size:18px; font-weight:800; margin-bottom:9px; }
+    .step-desc { font-size:14px; line-height:1.8; color:var(--text-muted); }
+
+    /* Stack marquee */
+    #stack { background:var(--dark-2); padding:64px 0; }
+    .marquee-wrap { overflow:hidden; border-top:1px solid var(--border); border-bottom:1px solid var(--border); margin-top:32px; }
+    .marquee { display:flex; animation:marquee 28s linear infinite; }
+    .marquee-inner { display:flex; }
+    @keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .tech-item { flex-shrink:0; padding:20px 38px; border-right:1px solid var(--border); display:flex; align-items:center; gap:11px; white-space:nowrap; font-size:14px; font-weight:600; color:var(--text-muted); transition:color 0.25s; }
+    .tech-dot { width:5px; height:5px; background:var(--orange); border-radius:50%; opacity:0.5; }
+
+    /* Results */
+    #results { background:var(--dark); }
+    .results-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:2px; max-width:1200px; margin:48px auto 0; background:var(--border); border:1px solid var(--border); }
+    .result-card { background:var(--dark); padding:44px 32px; transition:background 0.3s; }
+    .result-card:hover { background:var(--dark-3); }
+    .result-num { font-family:'Space Mono',monospace; font-size:46px; font-weight:700; color:var(--orange-glow); line-height:1; margin-bottom:8px; }
+    .result-label { font-size:16px; font-weight:700; margin-bottom:10px; }
+    .result-desc { font-size:13px; line-height:1.7; color:var(--text-muted); }
+
+    /* CTA */
+    #cta { background:var(--dark-2); text-align:center; position:relative; overflow:hidden; }
+    .cta-glow { position:absolute; width:600px; height:600px; background:radial-gradient(circle,rgba(200,85,0,0.11),transparent 70%); top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
+    .cta-inner { position:relative; z-index:1; }
+    .cta-inner p { font-size:17px; color:var(--text-muted); margin-bottom:44px; max-width:460px; margin-left:auto; margin-right:auto; line-height:1.85; }
+    .cta-contact-row { display:flex; align-items:center; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom:44px; }
+    .cta-email { font-family:'Space Mono',monospace; font-size:14px; color:var(--orange-light); text-decoration:none; border-bottom:1px solid var(--orange); padding-bottom:3px; transition:color 0.25s; }
+    .cta-email:hover { color:var(--orange-glow); }
+    .cta-divider { color:var(--text-dim); }
+
+    /* Footer */
+    footer { border-top:1px solid var(--border); padding:28px 64px; display:flex; align-items:center; justify-content:space-between; background:var(--dark); }
+    .footer-logo { font-family:'Space Mono',monospace; font-size:11px; color:var(--text-dim); letter-spacing:0.08em; }
+    .footer-links { display:flex; gap:28px; }
+    .footer-links a { font-size:12px; color:var(--text-dim); text-decoration:none; transition:color 0.25s; }
+    .footer-links a:hover { color:var(--orange-light); }
+    .footer-right { font-family:'Space Mono',monospace; font-size:10px; color:var(--text-dim); }
+
+    /* Reveal */
+    .reveal { opacity:0; transform:translateY(36px); transition:opacity 0.7s ease,transform 0.7s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .reveal-delay-1 { transition-delay:0.1s; }
+    .reveal-delay-2 { transition-delay:0.2s; }
+    .reveal-delay-3 { transition-delay:0.3s; }
+
+    @media (max-width:960px) {
+      nav { padding:16px 22px; }
+      nav.scrolled { padding:12px 22px; }
+      .nav-links { display:none; }
+      #hero { padding:110px 22px 80px; }
+      .hero-stats { left:22px; gap:24px; flex-wrap:wrap; }
+      section { padding:80px 22px; }
+      .about-grid { grid-template-columns:1fr; gap:44px; }
+      .about-img-outer { width:240px; height:240px; }
+      .about-photo { width:240px; height:240px; }
+      .services-grid { grid-template-columns:1fr; }
+      .projects-grid { grid-template-columns:1fr; }
+      .results-grid { grid-template-columns:repeat(2,1fr); }
+      footer { flex-direction:column; gap:18px; text-align:center; padding:28px 22px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <nav id="nav">
+    <div class="nav-logo"><div class="nav-logo-dot"></div>MOHANNAD.AI</div>
+    <ul class="nav-links">
+      <li><a href="#about">من أنا</a></li>
+      <li><a href="#services">الخدمات</a></li>
+      <li><a href="#projects">المشاريع</a></li>
+      <li><a href="#process">المنهجية</a></li>
+      <li><a href="#cta" class="nav-cta">ابدأ معي ←</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-tag">معماري الأتمتة والذكاء الاصطناعي</div>
+    <h1 class="hero-h1">أبني <span class="hero-h1-accent">Agents</span><br/>تعمل بدونك</h1>
+    <div class="hero-sub">AI · Automation · Agents</div>
+    <p class="hero-desc">
+      أحوّل أفكارك إلى <strong>أنظمة ذكية</strong> تعمل 24/7 بلا توقف —
+      من أتمتة العمليات المتكررة إلى بناء شبكات Agents متكاملة
+      تفكر، تقرر، وتُنجز بدون تدخل بشري.
+    </p>
+    <div class="hero-btns">
+      <a href="https://wa.me/249990055096" target="_blank" class="btn-primary">💬 تواصل عبر واتساب</a>
+      <a href="#projects" class="btn-secondary">عرض المشاريع ↓</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item"><span class="stat-num">50+</span><span class="stat-label">مشروع مكتمل</span></div>
+      <div class="stat-item"><span class="stat-num">90%</span><span class="stat-label">توفير في الوقت</span></div>
+      <div class="stat-item"><span class="stat-num">24/7</span><span class="stat-label">أنظمة تعمل</span></div>
+    </div>
+    <div class="scroll-hint"><span>scroll</span><div class="scroll-line"></div></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="about-grid">
+      <div class="about-img-wrap reveal" style="display:flex;flex-direction:column;align-items:center;">
+        <div class="about-img-outer">
+          <div class="about-img-ring"></div>
+          <div class="about-img-ring-2"></div>
+          <img class="about-photo" src="data:image/jpeg;base64,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" alt="مهند صابر" />
+          <div class="about-badge">متخصص في<br/><strong>AI Agents</strong></div>
+        </div>
+      </div>
+      <div class="about-text">
+        <div class="section-tag reveal">// من أنا</div>
+        <div class="about-name reveal"><em>مهند صابر</em></div>
+        <div class="about-role reveal">AI Automation Architect & Agent Builder</div>
+        <p class="reveal">
+          متخصص في <strong>هندسة الأتمتة والذكاء الاصطناعي</strong> — أربط أدوات الـ AI الحديثة
+          لبناء أنظمة تعمل باستقلالية تامة: تفكر، تقرر، وتُنجز المهام المعقدة.
+        </p>
+        <p class="reveal reveal-delay-1">
+          شغفي الحقيقي هو تحويل الأفكار إلى <strong>Agents ذكية</strong> تحل مشاكل حقيقية —
+          من n8n وMake إلى LangGraph وCrewAI، أختار الأداة الصحيحة لكل تحدي.
+        </p>
+        <div class="skills-grid reveal reveal-delay-2">
+          <span class="skill-chip">LangGraph</span>
+          <span class="skill-chip">CrewAI</span>
+          <span class="skill-chip">AutoGen</span>
+          <span class="skill-chip">n8n</span>
+          <span class="skill-chip">Make.com</span>
+          <span class="skill-chip">LangChain</span>
+          <span class="skill-chip">OpenAI API</span>
+          <span class="skill-chip">Claude API</span>
+          <span class="skill-chip">RAG Systems</span>
+          <span class="skill-chip">Vector DBs</span>
+          <span class="skill-chip">Python</span>
+          <span class="skill-chip">Zapier</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="services-header">
+      <div class="section-tag reveal">// الخدمات</div>
+      <h2 class="section-h2 reveal">ماذا <em>أبني</em> لك</h2>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-num">01</div>
+        <span class="service-icon">🧠</span>
+        <div class="service-title">بناء AI Agents</div>
+        <p class="service-desc">وكلاء ذكاء اصطناعي متخصصون يؤدون مهاماً بعينها باستقلالية — بحث، تحليل، كتابة، واتخاذ قرار.</p>
+        <div class="service-tags"><span class="service-tag">Multi-Agent</span><span class="service-tag">Tool Use</span><span class="service-tag">Memory</span></div>
+      </div>
+      <div class="service-card reveal reveal-delay-1">
+        <div class="service-num">02</div>
+        <span class="service-icon">⚙️</span>
+        <div class="service-title">أتمتة العمليات</div>
+        <p class="service-desc">سير عمل آلية تستبدل المهام اليدوية المتكررة وتعمل 24/7 بدقة واتساق تام.</p>
+        <div class="service-tags"><span class="service-tag">n8n</span><span class="service-tag">Make</span><span class="service-tag">Zapier</span></div>
+      </div>
+      <div class="service-card reveal reveal-delay-2">
+        <div class="service-num">03</div>
+        <span class="service-icon">🔗</span>
+        <div class="service-title">تكاملات API</div>
+        <p class="service-desc">ربط أنظمتك وتطبيقاتك في شبكة متكاملة يتدفق فيها البيانات بسلاسة مع نماذج الـ AI.</p>
+        <div class="service-tags"><span class="service-tag">REST API</span><span class="service-tag">Webhooks</span><span class="service-tag">MCP</span></div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">04</div>
+        <span class="service-icon">📚</span>
+        <div class="service-title">أنظمة RAG</div>
+        <p class="service-desc">قواعد معرفة ذكية تُمكّن الـ AI من الإجابة من بياناتك الخاصة — مستندات، قواعد بيانات، محادثات.</p>
+        <div class="service-tags"><span class="service-tag">Pinecone</span><span class="service-tag">Qdrant</span><span class="service-tag">Embeddings</span></div>
+      </div>
+      <div class="service-card reveal reveal-delay-1">
+        <div class="service-num">05</div>
+        <span class="service-icon">🤝</span>
+        <div class="service-title">فرق Agents متعددة</div>
+        <p class="service-desc">شبكات وكلاء متخصصين يعملون معاً لإنجاز مهام معقدة — كل agent له دور محدد ضمن منظومة متناسقة.</p>
+        <div class="service-tags"><span class="service-tag">CrewAI</span><span class="service-tag">LangGraph</span><span class="service-tag">Orchestration</span></div>
+      </div>
+      <div class="service-card reveal reveal-delay-2">
+        <div class="service-num">06</div>
+        <span class="service-icon">📊</span>
+        <div class="service-title">استشارات AI</div>
+        <p class="service-desc">تقييم وضعك الحالي ووضع خارطة طريق لتبني الذكاء الاصطناعي في عملك — القرار الصحيح في الوقت الصحيح.</p>
+        <div class="service-tags"><span class="service-tag">Strategy</span><span class="service-tag">Audit</span><span class="service-tag">Roadmap</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="projects-header">
+      <div class="section-tag reveal">// المشاريع</div>
+      <h2 class="section-h2 reveal">أعمال <em>منجزة</em></h2>
+    </div>
+    <div class="projects-grid">
+      <div class="project-card reveal">
+        <div class="project-visual">
+          <div class="project-visual-grid"></div>
+          <span class="project-emoji">🤖</span>
+          <span class="project-status status-live">● Live</span>
+        </div>
+        <div class="project-body">
+          <div class="project-cat">AI Agent</div>
+          <div class="project-title">Agent بحث وتقارير تلقائية</div>
+          <p class="project-desc">نظام Agent يبحث في الإنترنت، يحلل البيانات، ويولّد تقارير احترافية كاملة في دقائق بدلاً من ساعات.</p>
+          <div class="project-footer">
+            <div class="project-tech"><span class="proj-tag">LangGraph</span><span class="proj-tag">OpenAI</span><span class="proj-tag">Tavily</span></div>
+            <span class="project-metric">95% ↑ سرعة</span>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal reveal-delay-1">
+        <div class="project-visual">
+          <div class="project-visual-grid"></div>
+          <span class="project-emoji">⚡</span>
+          <span class="project-status status-live">● Live</span>
+        </div>
+        <div class="project-body">
+          <div class="project-cat">Automation</div>
+          <div class="project-title">أتمتة سير العمل لفريق مبيعات</div>
+          <p class="project-desc">أتمتة كاملة لعمليات المبيعات — من متابعة الليدز إلى إرسال العروض وتحديث CRM تلقائياً.</p>
+          <div class="project-footer">
+            <div class="project-tech"><span class="proj-tag">n8n</span><span class="proj-tag">HubSpot</span><span class="proj-tag">GPT-4</span></div>
+            <span class="project-metric">80% ↓ وقت يدوي</span>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal">
+        <div class="project-visual">
+          <div class="project-visual-grid"></div>
+          <span class="project-emoji">📚</span>
+          <span class="project-status status-case">Case Study</span>
+        </div>
+        <div class="project-body">
+          <div class="project-cat">RAG System</div>
+          <div class="project-title">مساعد ذكي لقاعدة معرفة شركة</div>
+          <p class="project-desc">نظام RAG يُجيب الموظفين على أسئلتهم من آلاف المستندات الداخلية بدقة ودون الحاجة للبحث اليدوي.</p>
+          <div class="project-footer">
+            <div class="project-tech"><span class="proj-tag">Qdrant</span><span class="proj-tag">Claude API</span><span class="proj-tag">FastAPI</span></div>
+            <span class="project-metric">10x ↑ إنتاجية</span>
+          </div>
+        </div>
+      </div>
+      <div class="project-card reveal reveal-delay-1">
+        <div class="project-visual">
+          <div class="project-visual-grid"></div>
+          <span class="project-emoji">🎯</span>
+          <span class="project-status status-live">● Live</span>
+        </div>
+        <div class="project-body">
+          <div class="project-cat">Multi-Agent</div>
+          <div class="project-title">فريق Agents لإدارة السوشيال ميديا</div>
+          <p class="project-desc">شبكة وكلاء متخصصة: agent للبحث، آخر للكتابة، وثالث للجدولة والنشر — بدون أي تدخل يدوي.</p>
+          <div class="project-footer">
+            <div class="project-tech"><span class="proj-tag">CrewAI</span><span class="proj-tag">Make.com</span><span class="proj-tag">GPT-4o</span></div>
+            <span class="project-metric">3x ↑ محتوى</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROCESS -->
+  <section id="process">
+    <div class="process-inner">
+      <div class="section-tag reveal">// المنهجية</div>
+      <h2 class="section-h2 reveal">كيف <em>نعمل</em> معاً</h2>
+      <div class="process-steps">
+        <div class="process-step reveal">
+          <div class="step-content">
+            <div class="step-title">الاستكشاف والتشخيص</div>
+            <p class="step-desc">نبدأ بجلسة نفهم فيها عملك وعملياتك الحالية — نحدد ما يأخذ وقتاً زائداً وما يمكن أتمتته فعلاً بعائد حقيقي.</p>
+          </div>
+          <div class="step-num-col"><div class="step-circle">01</div></div>
+        </div>
+        <div class="process-step reveal reveal-delay-1">
+          <div class="step-content">
+            <div class="step-title">التصميم والهندسة</div>
+            <p class="step-desc">أصمم معمارية النظام — الـ Agents المطلوبة، كيف تتواصل فيما بينها، وما الأدوات التي تستخدم في كل خطوة.</p>
+          </div>
+          <div class="step-num-col"><div class="step-circle">02</div></div>
+        </div>
+        <div class="process-step reveal reveal-delay-2">
+          <div class="step-content">
+            <div class="step-title">البناء والاختبار</div>
+            <p class="step-desc">تطوير الحل مرحلة بمرحلة مع اختبار مكثف في كل خطوة — لا يُطلق شيء لم يُختبر في بيئة حقيقية.</p>
+          </div>
+          <div class="step-num-col"><div class="step-circle">03</div></div>
+        </div>
+        <div class="process-step reveal reveal-delay-3">
+          <div class="step-content">
+            <div class="step-title">التسليم والمتابعة</div>
+            <p class="step-desc">تسليم النظام مع توثيق كامل وتدريب إذا لزم، ثم متابعة مستمرة لضمان أفضل أداء على المدى البعيد.</p>
+          </div>
+          <div class="step-num-col"><div class="step-circle">04</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section id="stack" style="padding:64px 0;">
+    <div style="padding:0 64px;margin-bottom:0;">
+      <div class="section-tag reveal" style="margin-bottom:0;">// الأدوات التي أستخدمها</div>
+    </div>
+    <div class="marquee-wrap">
+      <div class="marquee">
+        <div class="marquee-inner">
+          <div class="tech-item"><span class="tech-dot"></span>OpenAI GPT-4o</div>
+          <div class="tech-item"><span class="tech-dot"></span>Claude 3.5 Sonnet</div>
+          <div class="tech-item"><span class="tech-dot"></span>LangChain</div>
+          <div class="tech-item"><span class="tech-dot"></span>LangGraph</div>
+          <div class="tech-item"><span class="tech-dot"></span>CrewAI</div>
+          <div class="tech-item"><span class="tech-dot"></span>AutoGen</div>
+          <div class="tech-item"><span class="tech-dot"></span>n8n</div>
+          <div class="tech-item"><span class="tech-dot"></span>Make.com</div>
+          <div class="tech-item"><span class="tech-dot"></span>Pinecone</div>
+          <div class="tech-item"><span class="tech-dot"></span>Qdrant</div>
+          <div class="tech-item"><span class="tech-dot"></span>Supabase</div>
+          <div class="tech-item"><span class="tech-dot"></span>FastAPI</div>
+          <div class="tech-item"><span class="tech-dot"></span>Python</div>
+          <div class="tech-item"><span class="tech-dot"></span>Zapier</div>
+          <div class="tech-item"><span class="tech-dot"></span>Notion API</div>
+          <div class="tech-item"><span class="tech-dot"></span>Airtable</div>
+        </div>
+        <div class="marquee-inner" aria-hidden="true">
+          <div class="tech-item"><span class="tech-dot"></span>OpenAI GPT-4o</div>
+          <div class="tech-item"><span class="tech-dot"></span>Claude 3.5 Sonnet</div>
+          <div class="tech-item"><span class="tech-dot"></span>LangChain</div>
+          <div class="tech-item"><span class="tech-dot"></span>LangGraph</div>
+          <div class="tech-item"><span class="tech-dot"></span>CrewAI</div>
+          <div class="tech-item"><span class="tech-dot"></span>AutoGen</div>
+          <div class="tech-item"><span class="tech-dot"></span>n8n</div>
+          <div class="tech-item"><span class="tech-dot"></span>Make.com</div>
+          <div class="tech-item"><span class="tech-dot"></span>Pinecone</div>
+          <div class="tech-item"><span class="tech-dot"></span>Qdrant</div>
+          <div class="tech-item"><span class="tech-dot"></span>Supabase</div>
+          <div class="tech-item"><span class="tech-dot"></span>FastAPI</div>
+          <div class="tech-item"><span class="tech-dot"></span>Python</div>
+          <div class="tech-item"><span class="tech-dot"></span>Zapier</div>
+          <div class="tech-item"><span class="tech-dot"></span>Notion API</div>
+          <div class="tech-item"><span class="tech-dot"></span>Airtable</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results">
+    <div class="section-tag reveal">// النتائج</div>
+    <h2 class="section-h2 reveal">أرقام <em>حقيقية</em></h2>
+    <div class="results-grid">
+      <div class="result-card reveal">
+        <div class="result-num">90%</div>
+        <div class="result-label">تخفيض في الوقت اليدوي</div>
+        <p class="result-desc">ما كان يستغرق ساعات بات ينجز في دقائق.</p>
+      </div>
+      <div class="result-card reveal reveal-delay-1">
+        <div class="result-num">10x</div>
+        <div class="result-label">تضخيم في الإنتاجية</div>
+        <p class="result-desc">Agents تعمل عمل عشرة موظفين في المهام الروتينية.</p>
+      </div>
+      <div class="result-card reveal reveal-delay-2">
+        <div class="result-num">50+</div>
+        <div class="result-label">مشروع أتمتة منجز</div>
+        <p class="result-desc">كل مشروع بُني بدقة ليحل مشكلة حقيقية.</p>
+      </div>
+      <div class="result-card reveal reveal-delay-3">
+        <div class="result-num">24/7</div>
+        <div class="result-label">الأنظمة تعمل دائماً</div>
+        <p class="result-desc">بدون إجازات، بدون أخطاء بشرية، بدون توقف.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="cta">
+    <div class="cta-glow"></div>
+    <div class="cta-inner">
+      <div class="section-tag reveal" style="display:inline-block;">// تواصل معي</div>
+      <h2 class="section-h2 reveal">جاهز تبدأ<br/><em>مشروعك</em>؟</h2>
+      <p class="reveal">أخبرني عن فكرتك أو مشكلتك — سنجد معاً الحل الأمثل وأبدأ التنفيذ بسرعة.</p>
+      <div class="cta-contact-row reveal">
+        <a href="mailto:mohanadsaber444@gmail.com" class="cta-email">mohanadsaber444@gmail.com</a>
+        <span class="cta-divider">|</span>
+        <a href="https://wa.me/249990055096" class="cta-email" style="color:#25D366;border-color:#25D366;">+249 990 055 096</a>
+      </div>
+      <div class="hero-btns reveal" style="justify-content:center;">
+        <a href="https://wa.me/249990055096?text=مرحباً%20مهند%2C%20أريد%20الاستفسار%20عن%20خدماتك" target="_blank" class="btn-wa">💬 واتساب</a>
+        <a href="mailto:mohanadsaber444@gmail.com" class="btn-primary">✉️ راسلني الآن</a>
+        <a href="https://www.facebook.com/share/1b5Rjxf4Li/" target="_blank" class="btn-secondary">Facebook</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-logo">MOHANNAD SABER © 2025</div>
+    <div class="footer-links">
+      <a href="https://www.facebook.com/share/1b5Rjxf4Li/" target="_blank">Facebook</a>
+      <a href="https://wa.me/249990055096" target="_blank">WhatsApp</a>
+      <a href="mailto:mohanadsaber444@gmail.com">Email</a>
+    </div>
+    <div class="footer-right">Built with AI ♦</div>
+  </footer>
+
+  <script>
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx=0,my=0,rx=0,ry=0;
+    document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx+'px';cursor.style.top=my+'px';});
+    (function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+    document.querySelectorAll('a,button,.service-card,.project-card,.skill-chip,.result-card').forEach(el=>{
+      el.addEventListener('mouseenter',()=>ring.classList.add('hover'));
+      el.addEventListener('mouseleave',()=>ring.classList.remove('hover'));
+    });
+    const nav=document.getElementById('nav');
+    window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>40));
+    const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}}),{threshold:0.1});
+    document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+  </script>
+</body>
+</html>
